@@ -6,8 +6,8 @@ import java.nio.file.Files
 import com.quantexa.flightdata.SparkSessionTestWrapper
 import org.apache.spark.sql.types.{DataTypes, StructType}
 import org.scalatest.WordSpec
-
 import com.github.mrpowers.spark.fast.tests.DatasetComparer
+import org.apache.spark.sql.Encoders
 
 
 class CsvDatasetReaderTests extends WordSpec with SparkSessionTestWrapper with DatasetComparer {
@@ -30,10 +30,7 @@ class CsvDatasetReaderTests extends WordSpec with SparkSessionTestWrapper with D
       } finally {
         csvWriter.close()
       }
-      val schema = new StructType()
-        .add("givenName", DataTypes.StringType, false)
-        .add("surname", DataTypes.StringType, false)
-        .add("age", DataTypes.IntegerType, false)
+      val schema = Encoders.product[Person].schema
 
       val expectedDataset = Seq(
         Person("Jules", "Winnfield", 40),
@@ -44,7 +41,7 @@ class CsvDatasetReaderTests extends WordSpec with SparkSessionTestWrapper with D
       val csvDatasetReader = new CsvDatasetReader[Person](spark, csvFile.getAbsolutePath, Some(schema))
       val actualDataset = csvDatasetReader.getDataset
 
-      assertSmallDatasetEquality(actualDataset, expectedDataset)
+      assertSmallDatasetEquality(actualDataset, expectedDataset, ignoreNullable = true)
     }
 
     "return empty Dataset" in {
@@ -66,11 +63,13 @@ class CsvDatasetReaderTests extends WordSpec with SparkSessionTestWrapper with D
       val csvDatasetReader = new CsvDatasetReader[Person](spark, csvFile.getAbsolutePath, Some(schema))
       val actualDataset = csvDatasetReader.getDataset
 
-      assertSmallDatasetEquality(actualDataset, expectedDataset)
+      assertSmallDatasetEquality(actualDataset, expectedDataset, ignoreNullable = true)
     }
+
     "throw Exception for invalid CSV" in {
       ???
     }
+
     "throw Exception for incorrect schema" in {
       ???
     }

@@ -20,6 +20,11 @@ libraryDependencies ++= Seq(
   "MrPowers" % "spark-fast-tests" % versions('spark_fast_tests) % Test
 )
 
+dependencyOverrides ++= Seq(
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.6.7.1",
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.6.7.1"
+)
+
 // Set assembly name
 //assemblyJarName in assembly := s"${name.value}_${scalaBinaryVersion.value}-${version.value}.jar"
 //
