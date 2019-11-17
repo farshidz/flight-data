@@ -5,15 +5,19 @@ scalaVersion := "2.12.10"
 version := "0.1"
 val versions = Map(
   'spark -> "2.4.4",
-  'hadoop -> "3.1.0"
+  'hadoop -> "3.1.0",
+  'scalatest -> "3.0.8",
+  'spark_fast_tests -> "0.20.0-s_2.12"
 )
 
-//resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
+resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
 
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % versions('spark) % Provided,
   "org.apache.spark" %% "spark-sql" % versions('spark) % Provided,
-  "org.apache.hadoop" % "hadoop-common" % versions('hadoop) % Provided
+  "org.apache.hadoop" % "hadoop-common" % versions('hadoop) % Provided,
+  "org.scalatest" %% "scalatest" % versions('scalatest) % Test,
+  "MrPowers" % "spark-fast-tests" % versions('spark_fast_tests) % Test
 )
 
 // Set assembly name
