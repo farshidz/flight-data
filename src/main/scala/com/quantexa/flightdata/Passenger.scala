@@ -1,5 +1,5 @@
 package com.quantexa.flightdata
 
-class Passenger {
-
-}
+case class Passenger(passengerId: Int,
+                     firstName: String,
+                     lastName: String)
