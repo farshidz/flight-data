@@ -61,12 +61,10 @@ class FlightStatistics(spark: SparkSession) {
     * (reference country).
     *
     * @param flightData Dataset of [[FlightData]]
-    * @param passengers Dataset of [[Passenger]]s
     * @param refCountry The reference country
     * @return A [[Dataset]] of [[PassengerStatistics]]
     */
   def longestRuns(flightData: Dataset[FlightData],
-                  passengers: Dataset[Passenger],
                   refCountry: String): Dataset[PassengerStatistics] = ???
 
   /**
