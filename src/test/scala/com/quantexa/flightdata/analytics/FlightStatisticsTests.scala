@@ -84,6 +84,8 @@ class FlightStatisticsTests extends WordSpec with SparkSessionTestWrapper with D
           FlightData(1, 6, "cc", "uk", new Date(2017, 2, 6)),
           FlightData(3, 6, "cc", "uk", new Date(2017, 2, 6)),
           FlightData(1, 7, "uk", "dd", new Date(2017, 3, 1)),
+          FlightData(2, 8, "aa", "uk", new Date(2017, 3, 1)),
+
         ).toDS
         val expectedDataset = Seq(
           PassengerStatistics(1, 3),

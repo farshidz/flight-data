@@ -4,6 +4,7 @@ import java.sql.Date
 
 import com.github.dwickern.macros.NameOf._
 import com.quantexa.flightdata.{FlightData, Passenger}
+import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Dataset, SparkSession}
 
@@ -15,7 +16,10 @@ class FlightStatistics(spark: SparkSession) {
   import spark.implicits._
 
   final val NoFlightsCol = nameOf[FrequentFlyer](_.noFlights)
-  final val PassengeridCol = nameOf[Passenger](_.passengerId)
+  final val PassengerIdCol = nameOf[Passenger](_.passengerId)
+  final val FromCol = nameOf[FlightData](_.from)
+  final val ToCol = nameOf[FlightData](_.to)
+  final val LongestRunCol = nameOf[PassengerStatistics](_.longestRun)
 
   /**
     * Calculates the number of flights in each calendar month.
@@ -45,11 +49,10 @@ class FlightStatistics(spark: SparkSession) {
   def frequentFlyers(flightData: Dataset[FlightData],
                      passengers: Dataset[Passenger],
                      maxResults: Int = 100): Dataset[FrequentFlyer] = {
-
     flightData
       .groupByKey(_.passengerId)
       .count
-      .join(passengers, $"value" === passengers(PassengeridCol))
+      .join(passengers, $"value" === passengers(PassengerIdCol))
       .select(passengers.columns.map(col) ++ Seq($"count(1)".as(NoFlightsCol)): _*)
       .sort(col(NoFlightsCol).desc)
       .limit(maxResults)
@@ -65,7 +68,17 @@ class FlightStatistics(spark: SparkSession) {
     * @return A [[Dataset]] of [[PassengerStatistics]]
     */
   def longestRuns(flightData: Dataset[FlightData],
-                  refCountry: String): Dataset[PassengerStatistics] = ???
+                  refCountry: String): Dataset[PassengerStatistics] = {
+    val window = Window.partitionBy($"passengerId").orderBy($"date")
+
+    flightData
+      .withColumn("seq", row_number().over(window))
+      .filter(col(FromCol) === refCountry || col(ToCol) === refCountry)
+      .withColumn("noVisited", $"seq" - coalesce(lead($"seq", -1).over(window), $"seq"))
+      .groupBy(col(PassengerIdCol))
+      .agg(max($"noVisited").as(LongestRunCol))
+      .as[PassengerStatistics]
+  }
 
   /**
     * Finds passengers who have been on multiple flights together.
@@ -98,7 +111,7 @@ case class FrequentFlyer(passengerId: Long,
                          noFlights: Long)
 
 case class PassengerStatistics(passengerId: Long,
-                               longestRun: Long)
+                               longestRun: Int)
 
 case class PassengerPairStatistics(passengerId1: Long,
                                    passengerId2: Long,
