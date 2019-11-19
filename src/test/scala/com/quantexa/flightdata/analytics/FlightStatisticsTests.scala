@@ -62,7 +62,8 @@ class FlightStatisticsTests extends WordSpec with SparkSessionTestWrapper with D
           2
         )
 
-        assertSmallDatasetEquality(actualDataset, expectedDataset, ignoreNullable = true)
+        assertSmallDatasetEquality(actualDataset, expectedDataset,
+          ignoreNullable = true, orderedComparison = false)
       }
       "return empty dataset" in {
         ???
