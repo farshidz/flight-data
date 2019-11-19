@@ -3,7 +3,7 @@ package com.quantexa.flightdata.analytics
 import java.sql.Date
 
 import com.github.mrpowers.spark.fast.tests.DatasetComparer
-import com.quantexa.flightdata.{FlightData, SparkSessionTestWrapper}
+import com.quantexa.flightdata.{FlightData, Passenger, SparkSessionTestWrapper}
 import org.scalatest.WordSpec
 
 class FlightStatisticsTests extends WordSpec with SparkSessionTestWrapper with DatasetComparer {
@@ -25,7 +25,7 @@ class FlightStatisticsTests extends WordSpec with SparkSessionTestWrapper with D
         val expectedDataset = Seq(
           MonthStatistics(1, 1),
           MonthStatistics(2, 1),
-          MonthStatistics(3, 1)
+          MonthStatistics(3, 1),
         ).toDS
         val actualDataset = flightStatistics.flightsPerMonth(flightDataDataset, 2017)
 
@@ -38,7 +38,31 @@ class FlightStatisticsTests extends WordSpec with SparkSessionTestWrapper with D
 
     "calling frequentFlyers" should {
       "return correct dataset" in {
-        ???
+        val flightDataDataset = Seq(
+          FlightData(1, 1, "", "", new Date(2017, 1, 1)),
+          FlightData(3, 1, "", "", new Date(2017, 2, 5)),
+          FlightData(1, 2, "", "", new Date(2017, 2, 5)),
+          FlightData(6, 3, "", "", new Date(2017, 3, 1)),
+          FlightData(3, 2, "", "", new Date(2017, 2, 5)),
+          FlightData(1, 4, "", "", new Date(2017, 1, 1)),
+        ).toDS
+        val passengerDataset = Seq(
+          Passenger(3, "Honey", "Bunny"),
+          Passenger(1, "Jules", "Winnfield"),
+          Passenger(6, "Quentin", "Tarantino"),
+        ).toDS
+        val expectedDataset = Seq(
+          FrequentFlyer(1, "Jules", "Winnfield", 3),
+          FrequentFlyer(3, "Honey", "Bunny", 2)
+        ).toDS
+
+        val actualDataset = flightStatistics.frequentFlyers(
+          flightDataDataset,
+          passengerDataset,
+          2
+        )
+
+        assertSmallDatasetEquality(actualDataset, expectedDataset, ignoreNullable = true)
       }
       "return empty dataset" in {
         ???
