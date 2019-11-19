@@ -3,19 +3,31 @@ package com.quantexa.flightdata.analytics
 import java.sql.Date
 
 import com.quantexa.flightdata.{FlightData, Passenger}
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.{Dataset, SparkSession}
 
 /**
   * This class provides methods to calculate various statistics for flight data.
   */
-class FlightStatistics {
+class FlightStatistics(spark: SparkSession) {
+
+  import spark.implicits._
+
   /**
     * Calculates the number of flights in each calendar month.
     *
     * @param flightData Dataset of [[FlightData]]
+    * @param year       The year to calculate results for
     * @return A [[Dataset]] of [[MonthStatistics]]
     */
-  def flightsPerMonth(flightData: Dataset[FlightData]): Dataset[MonthStatistics] = ???
+  def flightsPerMonth(flightData: Dataset[FlightData], year: Int): Dataset[MonthStatistics] = {
+    flightData
+      .map(r => Flight(r.flightId, r.from, r.to, r.date))
+      .dropDuplicates
+      .filter(_.date.getYear == year)
+      .groupByKey(_.date.getMonth)
+      .count
+      .map(t => MonthStatistics(t._1, t._2.toInt))
+  }
 
   /**
     * Finds frequent flyers.
@@ -58,6 +70,11 @@ class FlightStatistics {
                     from: Option[Date] = None,
                     to: Option[Date] = None): Dataset[PassengerPairStatistics] = ???
 }
+
+case class Flight(flightId: Int,
+                  from: String,
+                  to: String,
+                  date: Date)
 
 case class MonthStatistics(month: Int,
                            noFlights: Int)
