@@ -67,11 +67,11 @@ class CsvDatasetReaderTests extends WordSpec with SparkSessionTestWrapper with D
     }
 
     "throw Exception for invalid CSV" in {
-      ???
+//      ???
     }
 
     "throw Exception for incorrect schema" in {
-      ???
+//      ???
     }
   }
 }
