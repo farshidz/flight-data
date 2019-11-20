@@ -15,11 +15,15 @@ class FlightStatistics(spark: SparkSession) {
 
   import spark.implicits._
 
+  // These will be inlined by the compiler
   final val NoFlightsCol = nameOf[FrequentFlyer](_.noFlights)
   final val PassengerIdCol = nameOf[Passenger](_.passengerId)
+  final val FlightIdCol = nameOf[FlightData](_.flightId)
   final val FromCol = nameOf[FlightData](_.from)
   final val ToCol = nameOf[FlightData](_.to)
   final val LongestRunCol = nameOf[PassengerStatistics](_.longestRun)
+  final val PassengerId1Col = nameOf[PassengerPairStatistics](_.passengerId1)
+  final val PassengerId2Col = nameOf[PassengerPairStatistics](_.passengerId2)
 
   /**
     * Calculates the number of flights in each calendar month.
@@ -85,14 +89,39 @@ class FlightStatistics(spark: SparkSession) {
     *
     * @param flightData Dataset of [[FlightData]]
     * @param minFlights Minimun number of shared flights to look for
-    * @param from       Optional date from
-    * @param to         Optional date to
+    * @param from       Optional date from. If provided, `to` must also be provided
+    * @param to         Optional date to. If provided, `from` must also be provided
     * @return A [[Dataset]] of [[PassengerPairStatistics]]
     */
   def sharedFlights(flightData: Dataset[FlightData],
                     minFlights: Int,
                     from: Option[Date] = None,
-                    to: Option[Date] = None): Dataset[PassengerPairStatistics] = ???
+                    to: Option[Date] = None): Dataset[PassengerPairStatistics] = {
+    require(from.nonEmpty && to.nonEmpty || from.isEmpty && to.isEmpty)
+
+    val passengerId1 = col(s"fd1.$PassengerIdCol")
+    val passengerId2 = col(s"fd2.$PassengerIdCol")
+
+    flightData
+      .filter(
+        from.map(d =>
+          (r: FlightData) => r.date.getTime >= d.getTime
+        ).getOrElse((_: FlightData) => true)
+      )
+      .filter(
+        to.map(d =>
+          (r: FlightData) => r.date.getTime <= d.getTime
+        ).getOrElse((_: FlightData) => true)
+      )
+      .as("fd1")
+      .join(flightData.as("fd2"), FlightIdCol)
+      .filter(passengerId1 < passengerId2)
+      .groupBy(passengerId1, passengerId2)
+      .count
+      .select(passengerId1.as(PassengerId1Col), passengerId2.as(PassengerId2Col), $"count".as(NoFlightsCol))
+      .as[PassengerPairStatistics]
+      .filter(_.noFlights >= minFlights)
+  }
 }
 
 case class Flight(flightId: Long,
@@ -113,6 +142,4 @@ case class PassengerStatistics(passengerId: Long,
 
 case class PassengerPairStatistics(passengerId1: Long,
                                    passengerId2: Long,
-                                   noFlights: Long,
-                                   from: Option[Date] = None,
-                                   to: Option[Date] = None)
+                                   noFlights: Long)
