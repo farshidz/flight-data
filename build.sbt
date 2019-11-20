@@ -5,7 +5,7 @@ scalaVersion := "2.12.10"
 version := "0.1"
 val versions = Map(
   'spark -> "2.4.4",
-  'hadoop -> "3.1.0",
+  'hadoop -> "2.6.5",
   'scalatest -> "3.0.8",
   'spark_fast_tests -> "0.20.0-s_2.12",
   'scala_nameof -> "1.0.3",
@@ -29,7 +29,7 @@ dependencyOverrides ++= Seq(
 )
 
 // Set assembly name
-//assemblyJarName in assembly := s"${name.value}_${scalaBinaryVersion.value}-${version.value}.jar"
-//
-//Compile / mainClass := Some("com.quantexa.flightdata.StatsApp")
-//mainClass in assembly := Some("com.quantexa.flightdata.StatsApp")
+assemblyJarName in assembly := s"${name.value}_${scalaBinaryVersion.value}-${version.value}.jar"
+
+Compile / mainClass := Some("com.quantexa.flightdata.StatsApp")
+mainClass in assembly := Some("com.quantexa.flightdata.StatsApp")
