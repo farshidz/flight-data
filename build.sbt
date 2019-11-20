@@ -33,3 +33,5 @@ assemblyJarName in assembly := s"${name.value}_${scalaBinaryVersion.value}-${ver
 
 Compile / mainClass := Some("com.quantexa.flightdata.StatsApp")
 mainClass in assembly := Some("com.quantexa.flightdata.StatsApp")
+
+enablePlugins(PackPlugin)
