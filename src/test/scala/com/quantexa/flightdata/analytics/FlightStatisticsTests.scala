@@ -103,14 +103,64 @@ class FlightStatisticsTests extends WordSpec with SparkSessionTestWrapper with D
       }
     }
 
-    "calling sharedFlights" should {
+    "calling sharedFlights with no dates" should {
       "return correct dataset" in {
-        ???
+        val flightDataDataset = Seq(
+          FlightData(1, 1, "uk", "aa", new Date(2017, 1, 1)),
+          FlightData(2, 1, "uk", "aa", new Date(2017, 1, 1)),
+          FlightData(3, 1, "uk", "aa", new Date(2017, 1, 1)),
+          FlightData(1, 2, "aa", "bb", new Date(2017, 1, 5)),
+          FlightData(3, 2, "aa", "bb", new Date(2017, 1, 5)),
+          FlightData(2, 3, "bb", "uk", new Date(2017, 2, 1)),
+          FlightData(3, 3, "bb", "uk", new Date(2017, 2, 1)),
+          FlightData(3, 4, "uk", "cc", new Date(2017, 2, 2)),
+          FlightData(1, 5, "bb", "cc", new Date(2017, 2, 4)),
+          FlightData(1, 6, "cc", "uk", new Date(2017, 2, 6)),
+          FlightData(3, 6, "cc", "uk", new Date(2017, 2, 6)),
+        ).toDS
+        val minFlights = 2
+        val expectedDataset = Seq(
+          PassengerPairStatistics(1, 3, 3),
+          PassengerPairStatistics(2, 3, 2),
+        ).toDS
+
+        val actualDataset = flightStatistics.sharedFlights(flightDataDataset, minFlights)
+
+        assertSmallDatasetEquality(actualDataset, expectedDataset,
+          ignoreNullable = true, orderedComparison = false)
       }
       "return empty dataset" in {
         ???
       }
     }
+    "calling sharedFlights with dates" should {
+      "return correct dataset" in {
+        val flightDataDataset = Seq(
+          FlightData(1, 1, "uk", "aa", new Date(2017, 1, 1)),
+          FlightData(2, 1, "uk", "aa", new Date(2017, 1, 1)),
+          FlightData(3, 1, "uk", "aa", new Date(2017, 1, 1)),
+          FlightData(1, 2, "aa", "bb", new Date(2017, 1, 5)),
+          FlightData(3, 2, "aa", "bb", new Date(2017, 1, 5)),
+          FlightData(2, 3, "bb", "uk", new Date(2017, 2, 1)),
+          FlightData(3, 3, "bb", "uk", new Date(2017, 2, 1)),
+          FlightData(3, 4, "uk", "cc", new Date(2017, 2, 2)),
+          FlightData(1, 5, "bb", "cc", new Date(2017, 2, 4)),
+          FlightData(1, 6, "cc", "uk", new Date(2017, 2, 6)),
+          FlightData(3, 6, "cc", "uk", new Date(2017, 2, 6)),
+        ).toDS
+        val minFlights = 1
+        val dateFrom = new Date(2017, 1, 2)
+        val dateTo = new Date(2017, 2, 2)
+        val expectedDataset = Seq(
+          PassengerPairStatistics(1, 3, 1),
+          PassengerPairStatistics(2, 3, 1),
+        ).toDS
 
+        val actualDataset = flightStatistics.sharedFlights(flightDataDataset, minFlights, Some(dateFrom), Some(dateTo))
+
+        assertSmallDatasetEquality(actualDataset, expectedDataset,
+          ignoreNullable = true, orderedComparison = false)
+      }
+    }
   }
 }

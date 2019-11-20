@@ -61,7 +61,7 @@ class FlightStatistics(spark: SparkSession) {
 
   /**
     * Calculates the greatest number of countries a passenger has been in without being in a certain country 
-    * (reference country).
+    * (reference country). A journey must start and end in the reference country to be included in the results.
     *
     * @param flightData Dataset of [[FlightData]]
     * @param refCountry The reference country
@@ -84,14 +84,12 @@ class FlightStatistics(spark: SparkSession) {
     * Finds passengers who have been on multiple flights together.
     *
     * @param flightData Dataset of [[FlightData]]
-    * @param passengers Dataset of [[Passenger]]s
     * @param minFlights Minimun number of shared flights to look for
     * @param from       Optional date from
     * @param to         Optional date to
     * @return A [[Dataset]] of [[PassengerPairStatistics]]
     */
   def sharedFlights(flightData: Dataset[FlightData],
-                    passengers: Dataset[Passenger],
                     minFlights: Int,
                     from: Option[Date] = None,
                     to: Option[Date] = None): Dataset[PassengerPairStatistics] = ???
