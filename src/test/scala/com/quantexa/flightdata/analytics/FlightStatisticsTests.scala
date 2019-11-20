@@ -32,7 +32,11 @@ class FlightStatisticsTests extends WordSpec with SparkSessionTestWrapper with D
         assertSmallDatasetEquality(actualDataset, expectedDataset, ignoreNullable = true)
       }
       "return empty dataset" in {
-        ???
+        val flightDataDataset = Seq[FlightData]().toDS
+        val expectedDataset = Seq[MonthStatistics]().toDS
+        val actualDataset = flightStatistics.flightsPerMonth(flightDataDataset, 2017)
+
+        assertSmallDatasetEquality(actualDataset, expectedDataset, ignoreNullable = true)
       }
     }
 
@@ -66,7 +70,12 @@ class FlightStatisticsTests extends WordSpec with SparkSessionTestWrapper with D
           ignoreNullable = true, orderedComparison = false)
       }
       "return empty dataset" in {
-        ???
+        val flightDataDataset = Seq[FlightData]().toDS
+        val passengerDataset = Seq[Passenger]().toDS
+        val expectedDataset = Seq[FrequentFlyer]().toDS
+        val actualDataset = flightStatistics.frequentFlyers(flightDataDataset, passengerDataset, 2)
+
+        assertSmallDatasetEquality(actualDataset, expectedDataset, ignoreNullable = true)
       }
     }
 
@@ -99,7 +108,11 @@ class FlightStatisticsTests extends WordSpec with SparkSessionTestWrapper with D
           ignoreNullable = true, orderedComparison = false)
       }
       "return empty dataset" in {
-        ???
+        val flightDataDataset = Seq[FlightData]().toDS
+        val expectedDataset = Seq[PassengerStatistics]().toDS
+        val actualDataset = flightStatistics.longestRuns(flightDataDataset, "uk")
+
+        assertSmallDatasetEquality(actualDataset, expectedDataset, ignoreNullable = true)
       }
     }
 
@@ -130,7 +143,11 @@ class FlightStatisticsTests extends WordSpec with SparkSessionTestWrapper with D
           ignoreNullable = true, orderedComparison = false)
       }
       "return empty dataset" in {
-        ???
+        val flightDataDataset = Seq[FlightData]().toDS
+        val expectedDataset = Seq[PassengerPairStatistics]().toDS
+        val actualDataset = flightStatistics.sharedFlights(flightDataDataset, 2)
+
+        assertSmallDatasetEquality(actualDataset, expectedDataset, ignoreNullable = true)
       }
     }
     "calling sharedFlights with dates" should {
