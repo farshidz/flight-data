@@ -1,10 +1,10 @@
 name := "flight-data"
 
 organization := "com.quantexa"
-scalaVersion := "2.12.10"
+scalaVersion := "2.11.12"
 version := "0.1"
 val versions = Map(
-  'spark -> "2.4.4",
+  'spark -> "2.4.1",
   'hadoop -> "2.6.5",
   'scalatest -> "3.0.8",
   'spark_fast_tests -> "0.20.0-s_2.12",
@@ -28,10 +28,6 @@ dependencyOverrides ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.6.7.1",
 )
 
-// Set assembly name
-assemblyJarName in assembly := s"${name.value}_${scalaBinaryVersion.value}-${version.value}.jar"
-
 Compile / mainClass := Some("com.quantexa.flightdata.StatsApp")
-mainClass in assembly := Some("com.quantexa.flightdata.StatsApp")
 
 enablePlugins(PackPlugin)

@@ -7,9 +7,11 @@ RUN apt-get update &&\
     echo "deb https://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list &&\
     apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823 &&\
     apt-get update &&\
-    apt-get install -y sbt=1.1.6
+    apt-get install -y sbt=1.3.3
 
-COPY src/ /app/source
+COPY project /app/source/project
+COPY build.sbt /app/source
+COPY src /app/source/src
 
 RUN cd /app/source &&\
 	sbt pack &&\
