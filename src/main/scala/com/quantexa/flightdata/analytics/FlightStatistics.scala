@@ -1,6 +1,7 @@
 package com.quantexa.flightdata.analytics
 
 import java.sql.Date
+import java.util.Calendar
 
 import com.github.dwickern.macros.NameOf._
 import com.quantexa.flightdata.{FlightData, Passenger}
@@ -33,17 +34,18 @@ class FlightStatistics(spark: SparkSession) {
     * @return A [[Dataset]] of [[MonthStatistics]]
     */
   def flightsPerMonth(flightData: Dataset[FlightData], year: Int): Dataset[MonthStatistics] = {
+    val calendar = Calendar.getInstance()
     flightData
       .map(r => Flight(r.flightId, r.from, r.to, r.date))
       .dropDuplicates
-      .filter(_.date.getYear == year)
+      .filter(_.date.getYear == year - 1900)
       .groupByKey(_.date.getMonth)
       .count
       .map(t => MonthStatistics(t._1, t._2.toInt))
   }
 
   /**
-    * Finds frequent flyers.
+    * Finds frequent flyers, sorted by number of flights in descending order.
     *
     * @param flightData Dataset of [[FlightData]]
     * @param passengers Dataset of [[Passenger]]s
