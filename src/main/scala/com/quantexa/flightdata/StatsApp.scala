@@ -42,7 +42,7 @@ object StatsApp {
 
     // Persist/cache flight data as it's used multiple times
     val flightDataDataset = flightDataReader.getDataset.persist()
-    val passengerDataset = passengerReader.getDataset.cache()
+    val passengerDataset = passengerReader.getDataset
 
     val flightStatistics = new FlightStatistics(spark)
 
